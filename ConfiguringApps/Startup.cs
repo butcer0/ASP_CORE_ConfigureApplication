@@ -23,16 +23,26 @@ namespace ConfiguringApps
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.UseMiddleware<ShortCircuitMiddleware>();
-            app.UseMiddleware<ContentMiddleware>();
+            if(env.IsDevelopment())
+            {
+                app.UseMiddleware<ErrorMiddleware>();
+                app.UseMiddleware<BrowserTypeMiddleware>();
+                app.UseMiddleware<ShortCircuitMiddleware>();
+                app.UseMiddleware<ContentMiddleware>();
+            }
+
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=Home}/{action=Index}/{id?}");
+            });
 
             #region Erik - 5/8/2018 Removed to show Middleware usage
             /*
             app.UseMvcWithDefaultRoute();
             */
             #endregion
-
-
 
             #region Depricated - 5/8/2018 Old Impl
             /*
