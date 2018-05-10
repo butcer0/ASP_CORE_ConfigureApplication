@@ -28,7 +28,30 @@ namespace ConfiguringApps
             return new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    config.AddJsonFile("appsettings.json",
+                        optional: true, reloadOnChange: true);
+                    config.AddEnvironmentVariables();
+                    if(args != null)
+                    {
+                        config.AddCommandLine(args);
+                    }
+                })
+                .ConfigureLogging((hostingContext, logging) =>
+                {
+                    logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+                    logging.AddConsole();
+                    logging.AddDebug();
+                    //Erik - 5/10/2018 Sends logging messages to Windows Event Log, good for Windows Server logging messages
+                    //logging.AddEventLog
+                })
                 .UseIISIntegration()
+                //Erik - 5/10/2018 This configures IoC
+                .UseDefaultServiceProvider((context, options) =>
+                {
+                    options.ValidateScopes = context.HostingEnvironment.IsDevelopment();
+                })
                 .UseStartup<Startup>()
                 .Build();
         }
