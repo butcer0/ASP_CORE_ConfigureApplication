@@ -30,8 +30,11 @@ namespace ConfiguringApps
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
+                    var env = hostingContext.HostingEnvironment;
                     config.AddJsonFile("appsettings.json",
-                        optional: true, reloadOnChange: true);
+                        optional: true, reloadOnChange: true)
+                        .AddJsonFile($"appsettings.{env.EnvironmentName}.json",
+                            optional: true, reloadOnChange: true);
                     config.AddEnvironmentVariables();
                     if(args != null)
                     {
@@ -52,7 +55,12 @@ namespace ConfiguringApps
                 {
                     options.ValidateScopes = context.HostingEnvironment.IsDevelopment();
                 })
-                .UseStartup<Startup>()
+                .UseStartup(nameof(ConfiguringApps))
+            #region Depricated - 5/11/2018 Use Startup by Environment
+                /*
+				.UseStartup<Startup>()
+				*/
+            #endregion
                 .Build();
         }
 

@@ -36,67 +36,100 @@ namespace ConfiguringApps
 
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void ConfigureDevelopmentServices(IServiceCollection services)
         {
-            if((Configuration.GetSection("ShortCircuitMiddleware")?.GetValue<bool>("EnableBrowserShortCircuit")).Value)
-            {
-                app.UseMiddleware<BrowserTypeMiddleware>();
-                app.UseMiddleware<ShortCircuitMiddleware>();
-            }
-
-            if(env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-                app.UseStatusCodePages();
-                app.UseBrowserLink();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-            }
-
-            #region Depricated - 5/10/2018 Custom Middleware Unnecessary
-            /*
-                        if(env.IsDevelopment())
-        {
-            app.UseMiddleware<ErrorMiddleware>();
-            app.UseMiddleware<BrowserTypeMiddleware>();
-            app.UseMiddleware<ShortCircuitMiddleware>();
-            app.UseMiddleware<ContentMiddleware>();
+            services.AddSingleton<UptimeService>();
+            services.AddMvc();
         }
 
-            */
-            #endregion
-
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
+            app.UseExceptionHandler("/Home/Error");
             app.UseStaticFiles();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Home}/{action=Index}/{Id?}");
             });
+        }
 
-            #region Erik - 5/8/2018 Removed to show Middleware usage
-            /*
-            app.UseMvcWithDefaultRoute();
-            */
-            #endregion
-
-            #region Depricated - 5/8/2018 Old Impl
-            /*
-             if (env.IsDevelopment())
+        public void ConfigureDevelopment(IApplicationBuilder app, IHostingEnvironment env)
         {
             app.UseDeveloperExceptionPage();
+            app.UseStatusCodePages();
+            app.UseBrowserLink();
+            app.UseStaticFiles();
+            app.UseMvcWithDefaultRoute();
         }
 
-        app.Run(async (context) =>
-        {
-            await context.Response.WriteAsync("Hello World!");
-        });
-            */
-            #endregion
+        #region Depricated - 5/11/2018 Implemented Separate Dev and Production Configure Methods
+        /*
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+{
+    if((Configuration.GetSection("ShortCircuitMiddleware")?.GetValue<bool>("EnableBrowserShortCircuit")).Value)
+    {
+        app.UseMiddleware<BrowserTypeMiddleware>();
+        app.UseMiddleware<ShortCircuitMiddleware>();
+    }
 
-        }
+    if(env.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+        app.UseStatusCodePages();
+        app.UseBrowserLink();
+    }
+    else
+    {
+        app.UseExceptionHandler("/Home/Error");
+    }
+
+    #region Depricated - 5/10/2018 Custom Middleware Unnecessary
+    /*
+                if(env.IsDevelopment())
+{
+    app.UseMiddleware<ErrorMiddleware>();
+    app.UseMiddleware<BrowserTypeMiddleware>();
+    app.UseMiddleware<ShortCircuitMiddleware>();
+    app.UseMiddleware<ContentMiddleware>();
+}
+
+    */
+        //#endregion
+
+        //app.UseStaticFiles();
+        //    app.UseMvc(routes =>
+        //    {
+        //        routes.MapRoute(
+        //            name: "default",
+        //            template: "{controller=Home}/{action=Index}/{id?}");
+        //    });
+
+        //    #region Erik - 5/8/2018 Removed to show Middleware usage
+        //    /*
+        //    app.UseMvcWithDefaultRoute();
+        //    */
+        //    #endregion
+
+        //    #region Depricated - 5/8/2018 Old Impl
+        //    /*
+        //     if (env.IsDevelopment())
+        //{
+        //    app.UseDeveloperExceptionPage();
+        //}
+
+        //app.Run(async (context) =>
+        //{
+        //    await context.Response.WriteAsync("Hello World!");
+        //});
+        //    */
+        //    #endregion
+
+        //}
+
+        //        */
+				#endregion
+
     }
 }
